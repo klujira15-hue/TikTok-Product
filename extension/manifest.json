@@ -1,0 +1,75 @@
+{
+  "manifest_version": 3,
+  "name": "Rujira · TikTok Product Collector",
+  "version": "1.1.1",
+  "description": "รับข้อมูลสินค้า JSON ที่หน้า TikTok ของคุณเรียก และส่งเข้าคลัง Rujira ในเครื่อง",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1/*",
+    "http://localhost/*"
+  ],
+  "background": {
+    "service_worker": "worker-v2.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.tiktok.com/*",
+        "https://tiktok.com/*"
+      ],
+      "js": [
+        "hook.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN",
+      "all_frames": true
+    },
+    {
+      "matches": [
+        "https://*.tiktok.com/*",
+        "https://tiktok.com/*"
+      ],
+      "js": [
+        "bridge.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true
+    },
+    {
+      "matches": [
+        "http://127.0.0.1:4317/*",
+        "http://localhost:4317/*"
+      ],
+      "js": [
+        "app-bridge.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://shop.tiktok.com/streamer/*",
+        "https://shop.tiktok.com/streamer"
+      ],
+      "js": [
+        "creator-driver.js"
+      ],
+      "run_at": "document_idle",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "https://shop.tiktok.com/streamer/*",
+        "https://shop.tiktok.com/streamer"
+      ],
+      "js": [
+        "creator-relay.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}

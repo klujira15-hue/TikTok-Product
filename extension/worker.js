@@ -1,0 +1,6 @@
+let sequence=Promise.resolve();
+chrome.runtime.onMessage.addListener((message,sender,respond)=>{
+  if(message.type!=='capture'||!sender.tab)return;
+  let host;try{host=new URL(sender.url).hostname;}catch{return;}if(!(host==='tiktok.com'||host.endsWith('.tiktok.com')))return;
+  sequence=sequence.then(async()=>{const config=await chrome.storage.local.get(['server','token','enabled']);if(!config.enabled){respond({ok:false});return;}try{const url=new URL(config.server||'http://127.0.0.1:4317');if(!['127.0.0.1','localhost'].includes(url.hostname)||url.protocol!=='http:')throw Error('Server ต้องเป็น localhost');const response=await fetch(url.origin+'/api/capture',{method:'POST',headers:{'Content-Type':'application/json','x-collector-token':config.token||''},body:JSON.stringify({sourceUrl:message.sourceUrl,payload:message.payload}),signal:AbortSignal.timeout(15000)});const result=await response.json();if(!response.ok)throw Error(result.error||'รับข้อมูลไม่สำเร็จ');const old=await chrome.storage.local.get('total');await chrome.storage.local.set({total:(old.total||0)+result.count,lastCount:result.count,lastAt:new Date().toISOString(),error:''});respond({ok:true,count:result.count});}catch(e){await chrome.storage.local.set({error:e.message});respond({ok:false,error:e.message});}}).catch(()=>respond({ok:false}));return true;
+});
